@@ -1,0 +1,233 @@
+#include<iostream>
+#include<fstream>
+#include<stdio.h>
+#include<stdlib.h>
+
+using namespace std;
+int res[200] = { 0 };
+int ret[200] = { 0 };
+int rec[200] = { 0 };
+
+int Chang(int *num, char *a)
+{
+	int len = strlen(a);
+	int i, ret = len - 1;
+	for (i = 0; i < len; i++)
+	{
+		if ('9' >= a[i] && '0' <= a[i])
+		{
+			num[ret--] = a[i] - '0';
+		}
+	}
+	return ret;
+}
+
+int func_jia(int *num1, int *num2, int n1, int n2)
+{
+	
+	int temp, jinwei = 0;
+	int n;
+	if (n1 > n2) n = n1;
+	else n = n2;
+	for (int i = 0; i < n; i++)
+	{
+		temp = num1[i] + num2[i] + jinwei;
+		jinwei = temp / 10;
+		res[i] = temp % 10;
+	}
+	cout << "两数的和为 :";
+	for (int i = n - 1; i >= 0; i--)
+	{
+		cout<< res[i];
+	}
+	return n;
+}
+
+int func_jian(int *num1, int *num2, int n1, int n2)
+{
+	
+	int temp;
+	if (n1 >= n2)
+	{
+		for (int i = 0; i < n1; i++)
+		{
+			if (num1[i] - num2[i] < 0)
+			{
+				num1[i + 1]--;
+				num1[i] += 10;
+				temp = num1[i] - num2[i];
+			}
+			else temp = num1[i] - num2[i];
+			ret[i] = temp;
+		}
+	}
+	else
+	{
+		for (int i = 0; i < n2; i++)
+		{
+			if (num2[i] - num1[i] < 0)
+			{
+				num2[i + 1]--;
+				num2[i] += 10;
+				temp = num2[i] - num1[i];
+			}
+			else temp = num2[i] - num1[i];
+			ret[i] = temp;
+		}
+	}
+	cout<<"两数的差为 :";
+	if (n1 > n2)
+	{
+		for (int i = n1 - 1; i >= 0; i--)
+		{
+			cout<< ret[i];
+		}
+		return n1;
+	}
+	else
+	{
+		for (int i = n2 - 1; i >= 0; i--)
+		{
+			cout<< ret[i];
+		}
+		return n2;
+	}
+}
+
+int func_cheng(int *num1, int *num2, int n1, int n2)
+{
+	bool start = false;
+	int temp;
+	int i, j;
+	int jinwei = 0;
+	for (i = 0; i < n1; i++)
+	{
+		for (j = 0; j < n2; j++)
+		{
+			temp = num1[i] * num2[j] + jinwei;
+			jinwei = temp / 10;
+			rec[j + i] += temp % 10;
+
+			while (rec[j + i] / 10)
+			{
+				rec[j + i + 1] += (rec[j + i] / 10);
+				rec[j + i] %= 10;
+			}
+
+			if (j == n2 - 1)
+			{
+				while (jinwei)
+				{
+					rec[j + i + 1] += jinwei ;
+					jinwei /= 10;
+				}
+			}
+		}
+	}
+	cout << "两数的积为:";
+	int len = n1+n2;
+	for (i = n1 + n2 -1; i >= 0; i--)
+	{
+		if (rec[i] != 0) start=true;
+		if(!start) len--;
+		if (start) cout << rec[i];
+	}
+	return len;
+}
+
+int main() {
+	ifstream pf;
+	ofstream of;
+	pf.open("data.txt");
+	if (!pf.is_open())
+	{
+		cout << "文件打开失败！！！\n";
+		exit(0);
+	}
+	bool fnum = true;
+	int i = 0, j = 0;
+	int m, n, k;
+	char a[100] = { 0 };
+	char b[100] = { 0 };
+	int num1[100] = { 0 };
+	int num2[100] = { 0 };
+	char ch;
+	pf.get(ch);
+	while (ch != '\n')
+	{
+		if (ch == ' ')
+		{
+			fnum = false;
+			pf.get(ch);
+			continue;
+		}
+		if (fnum)
+		{
+			a[i] = ch;
+			i++;
+		}
+		else if (!fnum)
+		{
+			b[j] = ch;
+			j++;
+		}
+		pf.get(ch);
+	}
+	if (!num1 || !num2) 
+	{
+		cout << "数据读取错误！！！\n";
+		exit(0);
+	}
+	pf.close();
+	cout << "第一个数为：";
+	for (k = 0; k < i; k++)
+	{
+		cout<< a[k];
+	}
+	cout << "\n第二个数为：";
+	for (k = 0; k < j; k++)
+	{
+		cout << b[k];
+	}
+	cout << "\n\n开始计算！！！\n\n";
+	
+	Chang(num1, a);
+	Chang(num2, b);
+
+	
+	m = func_cheng(num1, num2, i, j);
+	cout << endl;
+	n = func_jia(num1, num2, i, j);
+	cout << endl;
+	k = func_jian(num1, num2, i, j);
+	cout << endl;
+	
+	of.open("result.txt");
+	if (!of.is_open())
+	{
+		cout << "文件打开失败！！！";
+		exit(0);
+	}
+
+	of << "两数之和为：";
+	for (int x = n - 1; x >= 0; x--)
+	{
+		of << res[x];
+	}
+	of << "\n两数之差为：";
+	for (int x = k - 1; x >= 0; x--)
+	{
+		of << ret[x];
+	}
+	of << "\n两数之积为：";
+	for (int x = m - 1; x >= 0; x--)
+	{
+		of << rec[x];
+	}
+
+	of.close();
+
+	printf("\n结果以写入文件！！\n\n");
+	return 0;
+
+}
